@@ -1,7 +1,6 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
 #
-# progressbar  - Text progress bar library for Python.
+# progressbar  - progress bar library for Python/IPython
 # Copyright (c) 2005 Nilton Volpato
 #
 # This library is free software; you can redistribute it and/or
@@ -36,8 +35,25 @@ except ImportError:
     pass
 
 from compat import *  # for: any, next
-import widgets
+import widgets as pbar_widgets
 
+try:  # test if we are in IPython or not
+    from IPython import get_ipython
+    ip = get_ipython()
+    assert ip is not None
+    assert hasattr(ip, "comm_manager") 
+    ipython = True
+except:
+    ipython = False
+
+if ipython:
+    from IPython.display import display
+    from IPython.html.widgets import IntProgressWidget, TextWidget, ContainerWidget, LatexWidget
+    def backend_print(fd, str):
+        None
+else:
+    def backend_print(fd, str):
+        fd.write(sys.stderr.write)
 
 class UnknownLength: pass
 
@@ -89,11 +105,11 @@ class ProgressBar(object):
                  'left_justify', 'maxval', 'next_update', 'num_intervals',
                  'poll', 'seconds_elapsed', 'signal_set', 'start_time',
                  'term_width', 'update_interval', 'widgets', '_time_sensitive',
-                 '__iterable')
+                 '__iterable', 'bar_widget', 'container_widget')
 
     _DEFAULT_MAXVAL = 100
     _DEFAULT_TERMSIZE = 80
-    _DEFAULT_WIDGETS = [widgets.Percentage(), ' ', widgets.Bar()]
+    _DEFAULT_WIDGETS = [pbar_widgets.Percentage(), ' ', pbar_widgets.Bar()]
 
     def __init__(self, maxval=None, widgets=None, term_width=None, poll=1,
                  left_justify=True, fd=sys.stderr):
@@ -130,6 +146,22 @@ class ProgressBar(object):
         self.start_time = None
         self.update_interval = 1
         self.next_update = 0
+        self.bar_widget = None
+        self.container_widget = None
+        if ipython:
+            self.bar_widget = IntProgressWidget()
+            self.container_widget = ContainerWidget()
+            display(self.container_widget)
+            self.container_widget.remove_class("vbox")
+            self.container_widget.add_class("hbox")
+            children = []
+            for widget_type in self.widgets:
+                if isinstance(widget_type, pbar_widgets.WidgetHFill):
+                    children.append(self.bar_widget)
+                else:
+                    text_widget = LatexWidget()
+                    children.append(text_widget)
+            self.container_widget.children = children
 
 
     def __call__(self, iterable):
@@ -140,6 +172,8 @@ class ProgressBar(object):
         except:
             if self.maxval is None:
                 self.maxval = UnknownLength
+        if self.maxval != UnknownLength and self.bar_widget is not None:
+            self.bar_widget.max = self.maxval
 
         self.__iterable = iter(iterable)
         return self
@@ -197,11 +231,13 @@ class ProgressBar(object):
         width = self.term_width
 
         for index, widget in enumerate(self.widgets):
-            if isinstance(widget, widgets.WidgetHFill):
+            if isinstance(widget, pbar_widgets.WidgetHFill):
                 result.append(widget)
                 expanding.insert(0, index)
             else:
-                widget = widgets.format_updatable(widget, self)
+                widget = pbar_widgets.format_updatable(widget, self)
+                if ipython:
+                    self.container_widget.children[index].value = widget
                 result.append(widget)
                 width -= len(widget)
 
@@ -252,6 +288,8 @@ class ProgressBar(object):
                 raise ValueError('Value out of range')
 
             self.currval = value
+            if self.bar_widget is not None:
+                self.bar_widget.value = value
 
 
         if not self._need_update(): return
@@ -261,7 +299,7 @@ class ProgressBar(object):
         now = time.time()
         self.seconds_elapsed = now - self.start_time
         self.next_update = self.currval + self.update_interval
-        self.fd.write(self._format_line() + '\r')
+        backend_print(self.fd, self._format_line() + '\r')
         self.last_update_time = now
 
 
@@ -301,6 +339,6 @@ class ProgressBar(object):
             return
         self.finished = True
         self.update(self.maxval)
-        self.fd.write('\n')
+        backend_print(self.fd, '\n')
         if self.signal_set:
             signal.signal(signal.SIGWINCH, signal.SIG_DFL)
