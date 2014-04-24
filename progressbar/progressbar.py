@@ -42,6 +42,7 @@ try:  # test if we are in IPython or not
     ip = get_ipython()
     assert ip is not None
     assert hasattr(ip, "comm_manager") 
+    assert ip.config["IPKernelApp"]["parent_appname"] == 'ipython-notebook'
     ipython = True
 except:
     ipython = False
@@ -53,7 +54,7 @@ if ipython:
         None
 else:
     def backend_print(fd, str):
-        fd.write(sys.stderr.write)
+        fd.write(str)
 
 class UnknownLength: pass
 
