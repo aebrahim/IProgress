@@ -300,7 +300,7 @@ class ProgressBar(object):
         now = time.time()
         self.seconds_elapsed = now - self.start_time
         self.next_update = self.currval + self.update_interval
-        backend_print(self.fd, self._format_line() + '\r')
+        backend_print(self.fd, '\r' + self._format_line())
         self.last_update_time = now
 
 
@@ -328,6 +328,7 @@ class ProgressBar(object):
 
 
         self.start_time = self.last_update_time = time.time()
+        backend_print(self.fd, '\n')
         self.update(0)
 
         return self
