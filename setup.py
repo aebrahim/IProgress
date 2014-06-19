@@ -2,34 +2,34 @@
 
 import os
 from setuptools import setup, find_packages
-import progressbar
+import IProgress
 
 # TODO: I don't believe this should be in here. This should be done on package
 #       creation only
 try:
     readme = 'README.txt'
-    info = 'progressbar/__init__.py'
+    info = 'IProgress/__init__.py'
 
     if (not os.path.exists(readme) or
         os.stat(info).st_mtime > os.stat(readme).st_mtime):
 
-        open(readme,'w').write(progressbar.__doc__)
+        open(readme,'w').write(IProgress.__doc__)
 except: pass
 
 setup(
-    name='progressbar',
-    version=progressbar.__version__,
+    name='IProgress',
+    version=IProgress.__version__,
     packages=find_packages(),
 
-    description=progressbar.__doc__.split('\n')[0],
-    long_description=progressbar.__doc__,
+    description=IProgress.__doc__.split('\n')[0],
+    long_description=IProgress.__doc__,
 
-    author=progressbar.__author__,
-    maintainer=progressbar.__author__,
-    author_email=progressbar.__author_email__,
-    maintainer_email=progressbar.__author_email__,
+    author=IProgress.__author__,
+    maintainer=IProgress.__author__,
+    author_email=IProgress.__author_email__,
+    maintainer_email=IProgress.__author_email__,
 
-    url='http://code.google.com/p/python-progressbar',
+    url='http://code.google.com/p/python-IProgress',
     license='LICENSE.txt',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
