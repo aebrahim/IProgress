@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import os
 from setuptools import setup, find_packages
 import IProgress
@@ -25,11 +23,11 @@ setup(
     long_description=IProgress.__doc__,
 
     author=IProgress.__author__,
-    maintainer=IProgress.__author__,
+    maintainer="Ali Ebrahim",
     author_email=IProgress.__author_email__,
-    maintainer_email=IProgress.__author_email__,
+    maintainer_email="ali.ebrahim314@gmail.com",
 
-    url='http://code.google.com/p/python-IProgress',
+    url='https://github.com/aebrahim/IProgress',
     license='LICENSE.txt',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
