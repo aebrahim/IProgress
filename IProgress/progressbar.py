@@ -27,6 +27,8 @@ import signal
 import sys
 import time
 
+from warnings import warn
+
 try:
     from fcntl import ioctl
     from array import array
@@ -285,8 +287,8 @@ class ProgressBar(object):
         if value is not None and value is not UnknownLength:
             if (self.maxval is not UnknownLength
                 and not 0 <= value <= self.maxval):
-
-                raise ValueError('Value out of range')
+                warn('Value out of range')
+                return
 
             self.currval = value
             if self.bar_widget is not None:
