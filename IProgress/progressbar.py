@@ -291,6 +291,7 @@ class ProgressBar(object):
             self.currval = value
             if self.bar_widget is not None:
                 self.bar_widget.value = value
+                self.bar_widget.max = self.maxval
 
 
         if not self._need_update(): return
