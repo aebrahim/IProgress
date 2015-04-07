@@ -2,18 +2,6 @@ import os
 from setuptools import setup, find_packages
 import IProgress
 
-# TODO: I don't believe this should be in here. This should be done on package
-#       creation only
-try:
-    readme = 'README.txt'
-    info = 'IProgress/__init__.py'
-
-    if (not os.path.exists(readme) or
-        os.stat(info).st_mtime > os.stat(readme).st_mtime):
-
-        open(readme,'w').write(IProgress.__doc__)
-except: pass
-
 setup(
     name='IProgress',
     version=IProgress.__version__,
