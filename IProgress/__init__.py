@@ -43,6 +43,5 @@ __author__ = 'Nilton Volpato'
 __author_email__ = 'first-name dot last-name @ gmail.com'
 __version__ = '0.1'
 
-from compat import *
-from widgets import *
-from progressbar import *
+from .widgets import *
+from .progressbar import *

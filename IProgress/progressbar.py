@@ -29,6 +29,8 @@ import time
 
 from warnings import warn
 
+from six import next
+
 try:
     from fcntl import ioctl
     from array import array
@@ -36,27 +38,29 @@ try:
 except ImportError:
     pass
 
-from compat import *  # for: any, next
-import widgets as pbar_widgets
+from . import widgets as pbar_widgets
 
 try:  # test if we are in IPython or not
     from IPython import get_ipython
     ip = get_ipython()
     assert ip is not None
-    assert hasattr(ip, "comm_manager") 
+    assert hasattr(ip, "comm_manager")
     assert ip.config["IPKernelApp"]["parent_appname"] == 'ipython-notebook'
-    ipython = True
 except:
+    # Not using IPython
     ipython = False
 
-if ipython:
-    from IPython.display import display
-    from IPython.html.widgets import IntProgressWidget, TextWidget, ContainerWidget, LatexWidget
-    def backend_print(fd, str):
-        None
-else:
     def backend_print(fd, str):
         fd.write(str)
+else:
+    # Using IPython
+    ipython = True
+    from IPython.display import display
+    from IPython.html.widgets import IntProgressWidget, TextWidget, \
+        ContainerWidget, LatexWidget
+
+    def backend_print(fd, str):
+        None
 
 class UnknownLength: pass
 

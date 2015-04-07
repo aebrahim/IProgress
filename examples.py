@@ -4,7 +4,7 @@
 import sys
 import time
 
-from progressbar import AnimatedMarker, Bar, BouncingBar, Counter, ETA, \
+from IProgress import AnimatedMarker, Bar, BouncingBar, Counter, ETA, \
     AdaptiveETA, FileTransferSpeed, FormatLabel, Percentage, \
     ProgressBar, ReverseBar, RotatingMarker, \
     SimpleProgress, Timer

@@ -27,8 +27,10 @@ setup(
     author_email=IProgress.__author_email__,
     maintainer_email="ali.ebrahim314@gmail.com",
 
+    install_requires=["six"],
+
     url='https://github.com/aebrahim/IProgress',
-    license='LICENSE.txt',
+    license='GPL v2.1',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
@@ -41,11 +43,12 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.4',
         'Programming Language :: Python :: 2.5',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
         'Topic :: Software Development :: Libraries',
         'Topic :: Software Development :: User Interfaces',
         'Topic :: Terminals'
