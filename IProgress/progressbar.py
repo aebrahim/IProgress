@@ -27,7 +27,7 @@ import signal
 import sys
 import time
 
-from warnings import warn
+from warnings import warn, catch_warnings, simplefilter
 
 from six import next
 
@@ -42,11 +42,16 @@ from . import widgets as pbar_widgets
 
 try:  # test if we are in IPython or not
     from IPython import get_ipython
+    from IPython.terminal.interactiveshell import TerminalInteractiveShell
     ip = get_ipython()
     assert ip is not None
-    assert hasattr(ip, "comm_manager")
-    assert ip.config["IPKernelApp"]["parent_appname"] == 'ipython-notebook'
-except:
+    # ensure we are not in the regular terminal
+    assert not isinstance(ip, TerminalInteractiveShell)
+    # These worked in IPython 2 to differentiate the qtconsole from
+    # the notebook, but no longer work in IPython 3.
+    # assert hasattr(ip, "comm_manager")
+    # assert ip.config["IPKernelApp"]["parent_appname"] == 'ipython-notebook'
+except (ImportError, AssertionError):
     # Not using IPython
     ipython = False
 
@@ -56,13 +61,17 @@ else:
     # Using IPython
     ipython = True
     from IPython.display import display
-    from IPython.html.widgets import IntProgressWidget, TextWidget, \
-        ContainerWidget, LatexWidget
+    with catch_warnings() as w:
+        simplefilter("ignore")
+        from IPython.html.widgets import IntProgress, TextWidget, \
+            HBox, Latex
 
     def backend_print(fd, str):
         None
 
-class UnknownLength: pass
+
+class UnknownLength:
+    pass
 
 
 class ProgressBar(object):
@@ -139,7 +148,8 @@ class ProgressBar(object):
                 self._handle_resize()
                 signal.signal(signal.SIGWINCH, self._handle_resize)
                 self.signal_set = True
-            except (SystemExit, KeyboardInterrupt): raise
+            except (SystemExit, KeyboardInterrupt) as e:
+                raise e
             except:
                 self.term_width = self._env_size()
 
@@ -156,20 +166,18 @@ class ProgressBar(object):
         self.bar_widget = None
         self.container_widget = None
         if ipython:
-            self.bar_widget = IntProgressWidget()
-            self.container_widget = ContainerWidget()
+            self.bar_widget = IntProgress()
+            self.container_widget = HBox()
+            self.container_widget.align = "center"
             display(self.container_widget)
-            self.container_widget.remove_class("vbox")
-            self.container_widget.add_class("hbox")
             children = []
             for widget_type in self.widgets:
                 if isinstance(widget_type, pbar_widgets.WidgetHFill):
                     children.append(self.bar_widget)
                 else:
-                    text_widget = LatexWidget()
+                    text_widget = Latex()
                     children.append(text_widget)
             self.container_widget.children = children
-
 
     def __call__(self, iterable):
         """Use a ProgressBar to iterate through an iterable."""
@@ -185,10 +193,8 @@ class ProgressBar(object):
         self.__iterable = iter(iterable)
         return self
 
-
     def __iter__(self):
         return self
-
 
     def __next__(self):
         try:
@@ -204,24 +210,20 @@ class ProgressBar(object):
             self.finish()
             raise
 
-
     # Create an alias so that Python 2.x won't complain about not being
     # an iterator.
     next = __next__
-
 
     def _env_size(self):
         """Tries to find the term_width from the environment."""
 
         return int(os.environ.get('COLUMNS', self._DEFAULT_TERMSIZE)) - 1
 
-
     def _handle_resize(self, signum=None, frame=None):
         """Tries to catch resize signals sent from the terminal."""
 
         h, w = array('h', ioctl(self.fd, termios.TIOCGWINSZ, '\0' * 8))[:2]
         self.term_width = w
-
 
     def percentage(self):
         """Returns the progress as a percentage."""
@@ -230,7 +232,6 @@ class ProgressBar(object):
         return self.currval * 100.0 / self.maxval
 
     percent = property(percentage)
-
 
     def _format_widgets(self):
         result = []
@@ -260,37 +261,36 @@ class ProgressBar(object):
 
         return result
 
-
     def _format_line(self):
         """Joins the widgets and justifies the line."""
 
         widgets = ''.join(self._format_widgets())
 
-        if self.left_justify: return widgets.ljust(self.term_width)
-        else: return widgets.rjust(self.term_width)
-
+        if self.left_justify:
+            return widgets.ljust(self.term_width)
+        else:
+            return widgets.rjust(self.term_width)
 
     def _need_update(self):
         """Returns whether the ProgressBar should redraw the line."""
-        if self.currval >= self.next_update or self.finished: return True
+        if self.currval >= self.next_update or self.finished:
+            return True
 
         delta = time.time() - self.last_update_time
         return self._time_sensitive and delta > self.poll
-
 
     def _update_widgets(self):
         """Checks all widgets for the time sensitive bit."""
 
         self._time_sensitive = any(getattr(w, 'TIME_SENSITIVE', False)
-                                    for w in self.widgets)
-
+                                   for w in self.widgets)
 
     def update(self, value=None):
         """Updates the ProgressBar to a new value."""
 
         if value is not None and value is not UnknownLength:
-            if (self.maxval is not UnknownLength
-                and not 0 <= value <= self.maxval):
+            if self.maxval is not UnknownLength \
+                    and not 0 <= value <= self.maxval:
                 warn('Value out of range')
                 return
 
@@ -299,8 +299,8 @@ class ProgressBar(object):
                 self.bar_widget.value = value
                 self.bar_widget.max = self.maxval
 
-
-        if not self._need_update(): return
+        if not self._need_update():
+            return
         if self.start_time is None:
             raise RuntimeError('You must call "start" before calling "update"')
 
@@ -309,7 +309,6 @@ class ProgressBar(object):
         self.next_update = self.currval + self.update_interval
         backend_print(self.fd, '\r' + self._format_line())
         self.last_update_time = now
-
 
     def start(self):
         """Starts measuring time, and prints the bar at 0%.
@@ -330,16 +329,15 @@ class ProgressBar(object):
         self.next_update = 0
 
         if self.maxval is not UnknownLength:
-            if self.maxval < 0: raise ValueError('Value out of range')
+            if self.maxval < 0:
+                raise ValueError('Value out of range')
             self.update_interval = self.maxval / self.num_intervals
-
 
         self.start_time = self.last_update_time = time.time()
         backend_print(self.fd, '\n')
         self.update(0)
 
         return self
-
 
     def finish(self):
         """Puts the ProgressBar bar in the finished state."""
