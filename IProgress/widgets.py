@@ -35,8 +35,10 @@ else:
 
 
 def format_updatable(updatable, pbar):
-    if hasattr(updatable, 'update'): return updatable.update(pbar)
-    else: return updatable
+    if hasattr(updatable, 'update'):
+        return updatable.update(pbar)
+    else:
+        return updatable
 
 
 class Widget(AbstractWidget):
@@ -92,7 +94,6 @@ class Timer(Widget):
         """Formats time as the string "HH:MM:SS"."""
 
         return str(datetime.timedelta(seconds=int(seconds)))
-
 
     def update(self, pbar):
         """Updates the widget to show the elapsed time."""
@@ -176,7 +177,7 @@ class FileTransferSpeed(Widget):
     def update(self, pbar):
         """Updates the widget with the current SI prefixed speed."""
 
-        if pbar.seconds_elapsed < 2e-6 or pbar.currval < 2e-6: # =~ 0
+        if pbar.seconds_elapsed < 2e-6 or pbar.currval < 2e-6:  # =~ 0
             scaled = power = 0
         else:
             speed = pbar.currval / pbar.seconds_elapsed
@@ -201,7 +202,8 @@ class AnimatedMarker(Widget):
         """Updates the widget to show the next marker or the first marker when
         finished"""
 
-        if pbar.finished: return self.markers[0]
+        if pbar.finished:
+            return self.markers[0]
 
         self.curmark = (self.curmark + 1) % len(self.markers)
         return self.markers[self.curmark]
@@ -243,6 +245,7 @@ class FormatLabel(Timer):
     }
 
     __slots__ = ('format_string',)
+
     def __init__(self, format):
         self.format_string = format
 
@@ -251,12 +254,12 @@ class FormatLabel(Timer):
         for name, (key, transform) in self.mapping.items():
             try:
                 value = getattr(pbar, key)
-
                 if transform is None:
-                   context[name] = value
+                    context[name] = value
                 else:
-                   context[name] = transform(value)
-            except: pass
+                    context[name] = transform(value)
+            except:
+                pass
 
         return self.format_string % context
 
@@ -294,7 +297,6 @@ class Bar(WidgetHFill):
         self.fill = fill
         self.fill_left = fill_left
 
-
     def update(self, pbar, width):
         """Updates the progress bar and its subcomponents."""
 
@@ -304,9 +306,9 @@ class Bar(WidgetHFill):
         width -= len(left) + len(right)
         # Marked must *always* have length of 1
         if pbar.maxval:
-          marked *= int(pbar.currval / pbar.maxval * width)
+            marked *= int(pbar.currval / pbar.maxval * width)
         else:
-          marked = ''
+            marked = ''
 
         if self.fill_left:
             return '%s%s%s' % (left, marked.ljust(width, self.fill), right)
@@ -343,14 +345,17 @@ class BouncingBar(Bar):
 
         width -= len(left) + len(right)
 
-        if pbar.finished: return '%s%s%s' % (left, width * marker, right)
+        if pbar.finished:
+            return '%s%s%s' % (left, width * marker, right)
 
         position = int(pbar.currval % (width * 2 - 1))
-        if position > width: position = width * 2 - position
+        if position > width:
+            position = width * 2 - position
         lpad = self.fill * (position - 1)
         rpad = self.fill * (width - len(marker) - len(lpad))
 
         # Swap if we want to bounce the other way
-        if not self.fill_left: rpad, lpad = lpad, rpad
+        if not self.fill_left:
+            rpad, lpad = lpad, rpad
 
         return '%s%s%s%s%s' % (left, lpad, marker, rpad, right)
