@@ -39,7 +39,7 @@ The progressbar module is very easy to use, yet very powerful. It will also
 automatically enable features like auto-resizing when the system supports it.
 """
 
-__author__ = 'Nilton Volpato'
+__version__ = '0.2'
 __author_email__ = 'first-name dot last-name @ gmail.com'
 __version__ = '0.1'
 
