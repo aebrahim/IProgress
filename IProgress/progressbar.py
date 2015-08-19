@@ -63,8 +63,11 @@ else:
     from IPython.display import display
     with catch_warnings() as w:
         simplefilter("ignore")
-        from IPython.html.widgets import IntProgress, TextWidget, \
-            HBox, Latex
+        try:
+            from IPython.html.widgets import IntProgress, TextWidget, \
+                HBox, Latex
+        except ImportError:
+            from ipywidgets import IntProgress, Text, HBox, Latex
 
     def backend_print(fd, str):
         None
