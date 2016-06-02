@@ -65,9 +65,9 @@ else:
         simplefilter("ignore")
         try:
             from IPython.html.widgets import IntProgress, TextWidget, \
-                HBox, Latex
+                HBox, Label
         except ImportError:
-            from ipywidgets import IntProgress, Text, HBox, Latex
+            from ipywidgets import IntProgress, Text, HBox, Label
 
     def backend_print(fd, str):
         None
@@ -178,7 +178,7 @@ class ProgressBar(object):
                 if isinstance(widget_type, pbar_widgets.WidgetHFill):
                     children.append(self.bar_widget)
                 else:
-                    text_widget = Latex()
+                    text_widget = Label()
                     children.append(text_widget)
             self.container_widget.children = children
 
