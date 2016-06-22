@@ -41,7 +41,7 @@ automatically enable features like auto-resizing when the system supports it.
 
 __author__ = "Ali Ebrahim"
 __author_email__ = 'ali.ebrahim314@gmail.com'
-__version__ = '0.3'
+__version__ = '0.4'
 
 from .widgets import *
 from .progressbar import *
