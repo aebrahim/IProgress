@@ -3,6 +3,9 @@ IProgress
 
 A progress bar library for Python.
 
+> :warning: This code is no longer maintained. Please instead consider using
+> https://github.com/tqdm/tqdm which serves a very similar purpose.
+
 A progress bar is typically used to display the progress of a long running
 operation, providing a visual cue that processing is underway.
 
